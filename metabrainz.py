@@ -25,7 +25,6 @@ def get_args():
         help="An artist to search for",
         metavar="str",
         type=str,
-        nargs="+",
         required=True,
     )
 
@@ -38,7 +37,7 @@ class MusicMetadata:
     release_groups_endpoint = "http://musicbrainz.org/ws/2/release-group/"
     releases_endpoint = "http://musicbrainz.org/ws/2/release/"
 
-    def __init__(self, artist: list[str]):
+    def __init__(self, artist: str):
         self.artist = artist
 
     def pick_artist(self, artist_list):
@@ -48,21 +47,30 @@ class MusicMetadata:
 
     def query_artist(self) -> dict:
         endpoint = MusicMetadata.artist_endpoit
-        artist_query = "%20".join(self.artist)
-        query = f"{endpoint}?query={artist_query}&limit=3&fmt=json"
-        response = requests.get(query)
+        artist = self.artist.split()
+        artist = "%20".join(artist)
+        artist_query = f"{endpoint}?query={artist}&limit=3&fmt=json"
+        response = requests.get(artist_query)
         artist_list = response.json()["artists"]
         my_artist = self.pick_artist(artist_list)
-        pprint(my_artist)
         return my_artist
+
+    def get_release_groups(self) -> dict:
+        artist = self.query_artist()
+        artist_id = artist['id']
+        endpoint = MusicMetadata.artist_endpoit
+        artist_lookup = f"{endpoint}{artist_id}?inc=release-groups&fmt=json"
+        response = requests.get(artist_lookup)
+        release_groups = response.json()["release-groups"]
+        return release_groups
 
 
 # --------------------------------------------------
-def main(artist: list[str]) -> dict:
+def main(artist) -> dict:
     """Main function for program"""
 
     my_artist = MusicMetadata(artist)
-    my_artist.query_artist()
+    my_artist.get_release_groups()
 
 
 # --------------------------------------------------
