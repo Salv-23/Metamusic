@@ -38,35 +38,36 @@ class MusicMetadata:
     release_groups_endpoint = "http://musicbrainz.org/ws/2/release-group/"
     releases_endpoint = "http://musicbrainz.org/ws/2/release/"
 
-    def __init__(self, artist: str):
-        self.artist = artist
-
-    def pick_artist(self, artist_list):
+    @classmethod
+    def _pick_artist(cls, artist_list):
         for artist in artist_list:
             if artist["score"] == 100:
                 return artist
 
-    def get_artist_info(self) -> dict:
-        endpoint = MusicMetadata.artist_endpoit
-        artist = self.artist.split()
+    @classmethod
+    def get_artist_info(cls, artist: str) -> dict:
+        endpoint = cls.artist_endpoit
+        artist = artist.split()
         artist = "%20".join(artist)
         artist_query = f"{endpoint}?query={artist}&limit=3&fmt=json"
         response = requests.get(artist_query)
         artist_list = response.json()["artists"]
-        my_artist = self.pick_artist(artist_list)
+        my_artist = cls._pick_artist(artist_list)
         return my_artist
 
-    def get_release_groups(self) -> list:
-        artist = self.get_artist_info()
+    @classmethod
+    def get_release_groups(cls, artist: str) -> list:
+        artist = cls.get_artist_info(artist)
         artist_id = artist["id"]
-        endpoint = MusicMetadata.artist_endpoit
+        endpoint = cls.artist_endpoit
         artist_lookup = f"{endpoint}{artist_id}?inc=release-groups&fmt=json"
         response = requests.get(artist_lookup)
         release_groups = response.json()["release-groups"]
         return release_groups
 
-    def get_albums(self) -> list:
-        release_groups = self.get_release_groups()
+    @classmethod
+    def get_albums(cls, artist: str) -> list:
+        release_groups = cls.get_release_groups(artist)
         albums = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
@@ -79,8 +80,9 @@ class MusicMetadata:
             sleep(1)
         return albums
 
-    def get_singles(self) -> list:
-        release_groups = self.get_release_groups()
+    @classmethod
+    def get_singles(cls, artist: str) -> list:
+        release_groups = cls.get_release_groups(artist)
         singles = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
@@ -93,8 +95,9 @@ class MusicMetadata:
             sleep(1)
         return singles
 
-    def get_episodes(self) -> list:
-        release_groups = self.get_release_groups()
+    @classmethod
+    def get_episodes(cls, artist: str) -> list:
+        release_groups = cls.get_release_groups(artist)
         episodes = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
@@ -105,6 +108,7 @@ class MusicMetadata:
             if release["primary-type"] == "EP":
                 episodes.append(release)
             sleep(1)
+        pprint(episodes)
         return episodes
 
 
@@ -112,8 +116,8 @@ class MusicMetadata:
 def main(artist) -> dict:
     """Main function for program"""
 
-    my_artist = MusicMetadata(artist)
-    my_artist.get_artist_info()
+    client = MusicMetadata()
+    client.get_artist_info(artist)
 
 
 # --------------------------------------------------
