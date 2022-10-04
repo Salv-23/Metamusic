@@ -46,7 +46,7 @@ class MusicMetadata:
             if artist["score"] == 100:
                 return artist
 
-    def query_artist(self) -> dict:
+    def get_artist_info(self) -> dict:
         endpoint = MusicMetadata.artist_endpoit
         artist = self.artist.split()
         artist = "%20".join(artist)
@@ -56,8 +56,8 @@ class MusicMetadata:
         my_artist = self.pick_artist(artist_list)
         return my_artist
 
-    def get_release_groups(self) -> list[dict]:
-        artist = self.query_artist()
+    def get_release_groups(self) -> list:
+        artist = self.get_artist_info()
         artist_id = artist["id"]
         endpoint = MusicMetadata.artist_endpoit
         artist_lookup = f"{endpoint}{artist_id}?inc=release-groups&fmt=json"
@@ -65,19 +65,47 @@ class MusicMetadata:
         release_groups = response.json()["release-groups"]
         return release_groups
 
-    def get_releases(self) -> dict:
+    def get_albums(self) -> list:
         release_groups = self.get_release_groups()
-        releases = []
+        albums = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
             endpoint = MusicMetadata.release_groups_endpoint
-            release_lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
-            response = requests.get(release_lookup)
-            release_group = response.json()
-            releases.append(release_group)
-            sleep(2)
-        pprint(releases)
-        return releases
+            lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
+            response = requests.get(lookup)
+            release = response.json()
+            if release["primary-type"] == "Album":
+                albums.append(release)
+            sleep(1)
+        return albums
+
+    def get_singles(self) -> list:
+        release_groups = self.get_release_groups()
+        singles = []
+        for release_group in release_groups:
+            release_group_id = release_group["id"]
+            endpoint = MusicMetadata.release_groups_endpoint
+            lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
+            response = requests.get(lookup)
+            release = response.json()
+            if release["primary-type"] == "Single":
+                singles.append(release)
+            sleep(1)
+        return singles
+
+    def get_episodes(self) -> list:
+        release_groups = self.get_release_groups()
+        episodes = []
+        for release_group in release_groups:
+            release_group_id = release_group["id"]
+            endpoint = MusicMetadata.release_groups_endpoint
+            lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
+            response = requests.get(lookup)
+            release = response.json()
+            if release["primary-type"] == "EP":
+                episodes.append(release)
+            sleep(1)
+        return episodes
 
 
 # --------------------------------------------------
@@ -85,11 +113,10 @@ def main(artist) -> dict:
     """Main function for program"""
 
     my_artist = MusicMetadata(artist)
-    my_artist.get_releases()
+    my_artist.get_artist_info()
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
     arguments = get_args()
-    artist_argument = arguments.artist
-    main(artist_argument)
+    main(arguments.artist)
