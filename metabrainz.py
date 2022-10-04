@@ -8,6 +8,7 @@ Purpose: Query Metadata from MusicBrainz API
 import argparse
 import requests
 from pprint import pprint
+from time import sleep
 
 
 # --------------------------------------------------
@@ -55,14 +56,28 @@ class MusicMetadata:
         my_artist = self.pick_artist(artist_list)
         return my_artist
 
-    def get_release_groups(self) -> dict:
+    def get_release_groups(self) -> list[dict]:
         artist = self.query_artist()
-        artist_id = artist['id']
+        artist_id = artist["id"]
         endpoint = MusicMetadata.artist_endpoit
         artist_lookup = f"{endpoint}{artist_id}?inc=release-groups&fmt=json"
         response = requests.get(artist_lookup)
         release_groups = response.json()["release-groups"]
         return release_groups
+
+    def get_releases(self) -> dict:
+        release_groups = self.get_release_groups()
+        releases = []
+        for release_group in release_groups:
+            release_group_id = release_group["id"]
+            endpoint = MusicMetadata.release_groups_endpoint
+            release_lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
+            response = requests.get(release_lookup)
+            release_group = response.json()
+            releases.append(release_group)
+            sleep(2)
+        pprint(releases)
+        return releases
 
 
 # --------------------------------------------------
@@ -70,7 +85,7 @@ def main(artist) -> dict:
     """Main function for program"""
 
     my_artist = MusicMetadata(artist)
-    my_artist.get_release_groups()
+    my_artist.get_releases()
 
 
 # --------------------------------------------------
