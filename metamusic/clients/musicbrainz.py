@@ -5,7 +5,6 @@ Date   : 2022-09-30
 Purpose: Query Metadata from MusicBrainz API
 """
 
-import argparse
 import requests
 import logging
 from time import sleep
@@ -13,27 +12,6 @@ from time import sleep
 
 # --------------------------------------------------
 logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-
-# --------------------------------------------------
-def get_args():
-    """Get command-line arguments"""
-
-    parser = argparse.ArgumentParser(
-        description="Retrieve metadata from MusicBrainz API",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "-a",
-        "--artist",
-        help="An artist to search for",
-        metavar="str",
-        type=str,
-        required=True,
-    )
-
-    return parser.parse_args()
 
 
 # --------------------------------------------------
