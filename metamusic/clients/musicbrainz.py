@@ -7,8 +7,12 @@ Purpose: Query Metadata from MusicBrainz API
 
 import argparse
 import requests
-from pprint import pprint
+import logging
 from time import sleep
+
+
+# --------------------------------------------------
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 # --------------------------------------------------
@@ -53,7 +57,7 @@ class MusicMetadata:
         response = requests.get(artist_query)
         artist_list = response.json()["artists"]
         my_artist = cls._pick_artist(artist_list)
-        pprint(my_artist)
+        logging.info(my_artist)
         return my_artist
 
     @classmethod
@@ -64,6 +68,7 @@ class MusicMetadata:
         artist_lookup = f"{endpoint}{artist_id}?inc=release-groups&fmt=json"
         response = requests.get(artist_lookup)
         release_groups = response.json()["release-groups"]
+        logging.info(release_groups)
         return release_groups
 
     @classmethod
@@ -79,6 +84,7 @@ class MusicMetadata:
             if release["primary-type"] == "Album":
                 albums.append(release)
             sleep(1)
+        logging.info(albums)
         return albums
 
     @classmethod
@@ -94,6 +100,7 @@ class MusicMetadata:
             if release["primary-type"] == "Single":
                 singles.append(release)
             sleep(1)
+        logging.info(singles)
         return singles
 
     @classmethod
@@ -109,7 +116,7 @@ class MusicMetadata:
             if release["primary-type"] == "EP":
                 episodes.append(release)
             sleep(1)
-        pprint(episodes)
+        logging.info(episodes)
         return episodes
 
 
