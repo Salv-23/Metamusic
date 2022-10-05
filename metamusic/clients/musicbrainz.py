@@ -39,7 +39,7 @@ class MusicMetadata:
     releases_endpoint = "http://musicbrainz.org/ws/2/release/"
 
     @classmethod
-    def _pick_artist(cls, artist_list):
+    def _pick_artist(cls, artist_list: list[dict]):
         for artist in artist_list:
             if artist["score"] == 100:
                 return artist
@@ -49,10 +49,11 @@ class MusicMetadata:
         endpoint = cls.artist_endpoit
         artist = artist.split()
         artist = "%20".join(artist)
-        artist_query = f"{endpoint}?query={artist}&limit=3&fmt=json"
+        artist_query = f"{endpoint}?query={artist}&fmt=json"
         response = requests.get(artist_query)
         artist_list = response.json()["artists"]
         my_artist = cls._pick_artist(artist_list)
+        pprint(my_artist)
         return my_artist
 
     @classmethod
