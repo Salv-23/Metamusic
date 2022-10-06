@@ -27,6 +27,13 @@ class MusicMetadata:
                 return artist
 
     @classmethod
+    def _artist_lookup(cls, artist_id: str) -> dict:
+        artist_lookup = f"{cls.artist_endpoit}{artist_id}?inc=release-groups&fmt=json"
+        artist_response = requests.get(artist_lookup)
+        artist_info = artist_response.json()
+        return artist_info
+
+    @classmethod
     def get_artist_info(cls, artist: str) -> dict:
         endpoint = cls.artist_endpoit
         artist = artist.split()
@@ -34,8 +41,10 @@ class MusicMetadata:
         artist_query = f"{endpoint}?query={artist}&fmt=json"
         response = requests.get(artist_query)
         artist_list = response.json()["artists"]
-        my_artist = cls._pick_artist(artist_list)
-        logging.info(my_artist)
+        artist_pick = cls._pick_artist(artist_list)
+        my_artist = cls._artist_lookup(artist_pick["id"])
+        __import__('pprint').pprint(my_artist)
+        # logging.info(my_artist)
         return my_artist
 
     @classmethod
@@ -55,7 +64,7 @@ class MusicMetadata:
         albums = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
-            endpoint = MusicMetadata.release_groups_endpoint
+            endpoint = cls.release_groups_endpoint
             lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
             response = requests.get(lookup)
             release = response.json()
@@ -71,7 +80,7 @@ class MusicMetadata:
         singles = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
-            endpoint = MusicMetadata.release_groups_endpoint
+            endpoint = cls.release_groups_endpoint
             lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
             response = requests.get(lookup)
             release = response.json()
@@ -87,7 +96,7 @@ class MusicMetadata:
         episodes = []
         for release_group in release_groups:
             release_group_id = release_group["id"]
-            endpoint = MusicMetadata.release_groups_endpoint
+            endpoint = cls.release_groups_endpoint
             lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
             response = requests.get(lookup)
             release = response.json()
@@ -108,5 +117,4 @@ def main(artist) -> dict:
 
 # --------------------------------------------------
 if __name__ == "__main__":
-    arguments = get_args()
-    main(arguments.artist)
+    main("Kings of convenience")
