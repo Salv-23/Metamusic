@@ -32,7 +32,7 @@ class MusicMetadata:
         artist_response = requests.get(artist_lookup)
         artist_info = artist_response.json()
         return artist_info
-    
+
     @classmethod
     def _query_artist(cls, artist: str) -> dict:
         artist = artist.split()
@@ -47,24 +47,15 @@ class MusicMetadata:
         artist_list = cls._query_artist(artist)
         artist_pick = cls._pick_artist(artist_list)
         my_artist = cls._artist_lookup(artist_pick["id"])
-        __import__('pprint').pprint(my_artist)
-        # logging.info(my_artist)
         return my_artist
 
     @classmethod
     def get_albums(cls, artist: str) -> list:
-        release_groups = cls.get_release_groups(artist)
+        release_groups = cls.get_artist_info(artist)["release-groups"]
         albums = []
         for release_group in release_groups:
-            release_group_id = release_group["id"]
-            endpoint = cls.release_groups_endpoint
-            lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
-            response = requests.get(lookup)
-            release = response.json()
-            if release["primary-type"] == "Album":
-                albums.append(release)
-            sleep(1)
-        logging.info(albums)
+            if release_group["primary-type"] == "Album":
+                albums.append(release_group)
         return albums
 
     @classmethod
@@ -105,7 +96,7 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_artist_info(artist)
+    client.get_albums(artist)
 
 
 # --------------------------------------------------
