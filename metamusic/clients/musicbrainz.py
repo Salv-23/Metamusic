@@ -53,25 +53,18 @@ class MusicMetadata:
     def get_albums(cls, artist: str) -> list:
         release_groups = cls.get_artist_info(artist)["release-groups"]
         albums = []
-        for release_group in release_groups:
-            if release_group["primary-type"] == "Album":
-                albums.append(release_group)
+        for release in release_groups:
+            if release["primary-type"] == "Album":
+                albums.append(release)
         return albums
 
     @classmethod
     def get_singles(cls, artist: str) -> list:
-        release_groups = cls.get_release_groups(artist)
+        release_groups = cls.get_artist_info(artist)["release-groups"]
         singles = []
-        for release_group in release_groups:
-            release_group_id = release_group["id"]
-            endpoint = cls.release_groups_endpoint
-            lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
-            response = requests.get(lookup)
-            release = response.json()
+        for release in release_groups:
             if release["primary-type"] == "Single":
                 singles.append(release)
-            sleep(1)
-        logging.info(singles)
         return singles
 
     @classmethod
@@ -96,7 +89,7 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_albums(artist)
+    client.get_singles(artist)
 
 
 # --------------------------------------------------
