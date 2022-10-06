@@ -32,15 +32,19 @@ class MusicMetadata:
         artist_response = requests.get(artist_lookup)
         artist_info = artist_response.json()
         return artist_info
+    
+    @classmethod
+    def _query_artist(cls, artist: str) -> dict:
+        artist = artist.split()
+        artist = "%20".join(artist)
+        artist_query = f"{cls.artist_endpoit}?query={artist}&fmt=json"
+        response = requests.get(artist_query)
+        artist_list = response.json()["artists"]
+        return artist_list
 
     @classmethod
     def get_artist_info(cls, artist: str) -> dict:
-        endpoint = cls.artist_endpoit
-        artist = artist.split()
-        artist = "%20".join(artist)
-        artist_query = f"{endpoint}?query={artist}&fmt=json"
-        response = requests.get(artist_query)
-        artist_list = response.json()["artists"]
+        artist_list = cls._query_artist(artist)
         artist_pick = cls._pick_artist(artist_list)
         my_artist = cls._artist_lookup(artist_pick["id"])
         __import__('pprint').pprint(my_artist)
