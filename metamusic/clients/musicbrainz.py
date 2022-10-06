@@ -48,17 +48,6 @@ class MusicMetadata:
         return my_artist
 
     @classmethod
-    def get_release_groups(cls, artist: str) -> list:
-        artist = cls.get_artist_info(artist)
-        artist_id = artist["id"]
-        endpoint = cls.artist_endpoit
-        artist_lookup = f"{endpoint}{artist_id}?inc=release-groups&fmt=json"
-        response = requests.get(artist_lookup)
-        release_groups = response.json()["release-groups"]
-        logging.info(release_groups)
-        return release_groups
-
-    @classmethod
     def get_albums(cls, artist: str) -> list:
         release_groups = cls.get_release_groups(artist)
         albums = []
