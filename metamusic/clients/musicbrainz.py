@@ -17,9 +17,18 @@ class MusicMetadata:
 
     @classmethod
     def _pick_artist(cls, artist_list: list[dict]):
-        for artist in artist_list:
-            if artist["score"] == 100:
-                return artist
+        # TODO: Deal with artists that don't return a score equal to 100.
+        artist = None
+        for posible_artist in artist_list:
+            if not artist:
+                artist = posible_artist
+            elif artist["score"] < posible_artist["score"]:
+                artist = posible_artist
+        if artist and artist["score"] != 100:
+            raise NotImplementedError(
+                "Selection of artists with lower score than 100 not implemented yet"
+            )
+        return artist
 
     @classmethod
     def _artist_lookup(cls, artist_id: str) -> dict:
@@ -40,14 +49,18 @@ class MusicMetadata:
     @classmethod
     def _pick_release(cls, release_group: str) -> dict:
         release_id = release_group["id"]
-        release_lookup = f"{cls.releases_endpoint}{release_id}?inc=artists+recordings&fmt=json"
+        release_lookup = (
+            f"{cls.releases_endpoint}{release_id}?inc=artists+recordings&fmt=json"
+        )
         release_response = requests.get(release_lookup)
         release = release_response.json()
         return release
 
     @classmethod
     def _release_lookup(cls, release_group_id: str) -> dict:
-        release_lookup = f"{cls.release_groups_endpoint}{release_group_id}?inc=releases&fmt=json"
+        release_lookup = (
+            f"{cls.release_groups_endpoint}{release_group_id}?inc=releases&fmt=json"
+        )
         release_response = requests.get(release_lookup)
         release_info = release_response.json()["releases"][0]
         return release_info
@@ -57,6 +70,7 @@ class MusicMetadata:
         artist_list = cls._query_artist(artist)
         artist_pick = cls._pick_artist(artist_list)
         my_artist = cls._artist_lookup(artist_pick["id"])
+        __import__('pprint').pprint(my_artist)
         return my_artist
 
     @classmethod
@@ -93,7 +107,6 @@ class MusicMetadata:
                 release_pick = cls._pick_release(release_lookup)
                 episodes.append(release_pick)
                 sleep(1)
-        __import__('pprint').pprint(episodes)
         return episodes
 
 
@@ -102,9 +115,9 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_episodes(artist)
+    client.get_artist_info(artist)
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
-    main("Kings of convenience")
+    main("Coldplay")
