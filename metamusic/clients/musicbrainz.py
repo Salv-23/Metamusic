@@ -77,7 +77,10 @@ class MusicMetadata:
         singles = []
         for release in release_groups:
             if release["primary-type"] == "Single":
-                singles.append(release)
+                release_lookup = cls._release_lookup(release["id"])
+                release_pick = cls._pick_release(release_lookup)
+                singles.append(release_pick)
+                sleep(1)
         return singles
 
     @classmethod
@@ -96,7 +99,7 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_albums(artist)
+    client.get_singles(artist)
 
 
 # --------------------------------------------------
