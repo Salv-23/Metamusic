@@ -6,12 +6,7 @@ Purpose: Query Metadata from MusicBrainz API
 """
 
 import requests
-import logging
 from time import sleep
-
-
-# --------------------------------------------------
-logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 # --------------------------------------------------
@@ -43,6 +38,21 @@ class MusicMetadata:
         return artist_list
 
     @classmethod
+    def _pick_release(cls, release_group: str) -> dict:
+        release_id = release_group["id"]
+        release_lookup = f"{cls.releases_endpoint}{release_id}?inc=artists+recordings&fmt=json"
+        release_response = requests.get(release_lookup)
+        release = release_response.json()
+        return release
+
+    @classmethod
+    def _release_lookup(cls, release_group_id: str) -> dict:
+        release_lookup = f"{cls.release_groups_endpoint}{release_group_id}?inc=releases&fmt=json"
+        release_response = requests.get(release_lookup)
+        release_info = release_response.json()["releases"][0]
+        return release_info
+
+    @classmethod
     def get_artist_info(cls, artist: str) -> dict:
         artist_list = cls._query_artist(artist)
         artist_pick = cls._pick_artist(artist_list)
@@ -55,7 +65,10 @@ class MusicMetadata:
         albums = []
         for release in release_groups:
             if release["primary-type"] == "Album":
-                albums.append(release)
+                release_lookup = cls._release_lookup(release["id"])
+                release_pick = cls._pick_release(release_lookup)
+                albums.append(release_pick)
+                sleep(1)
         return albums
 
     @classmethod
@@ -69,18 +82,12 @@ class MusicMetadata:
 
     @classmethod
     def get_episodes(cls, artist: str) -> list:
-        release_groups = cls.get_release_groups(artist)
+        release_groups = cls.get_artist_info(artist)["release-groups"]
         episodes = []
-        for release_group in release_groups:
-            release_group_id = release_group["id"]
-            endpoint = cls.release_groups_endpoint
-            lookup = f"{endpoint}{release_group_id}?inc=artists&fmt=json"
-            response = requests.get(lookup)
-            release = response.json()
+        for release in release_groups:
             if release["primary-type"] == "EP":
                 episodes.append(release)
-            sleep(1)
-        logging.info(episodes)
+        __import__('pprint').pprint(episodes)
         return episodes
 
 
@@ -89,7 +96,7 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_singles(artist)
+    client.get_albums(artist)
 
 
 # --------------------------------------------------
