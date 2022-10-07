@@ -89,7 +89,10 @@ class MusicMetadata:
         episodes = []
         for release in release_groups:
             if release["primary-type"] == "EP":
-                episodes.append(release)
+                release_lookup = cls._release_lookup(release["id"])
+                release_pick = cls._pick_release(release_lookup)
+                episodes.append(release_pick)
+                sleep(1)
         __import__('pprint').pprint(episodes)
         return episodes
 
@@ -99,7 +102,7 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_singles(artist)
+    client.get_episodes(artist)
 
 
 # --------------------------------------------------
