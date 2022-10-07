@@ -11,9 +11,7 @@ from time import sleep
 
 # --------------------------------------------------
 class MusicMetadata:
-    artist_endpoit = "http://musicbrainz.org/ws/2/artist/"
-    release_groups_endpoint = "http://musicbrainz.org/ws/2/release-group/"
-    releases_endpoint = "http://musicbrainz.org/ws/2/release/"
+    base_url = "http://musicbrainz.org/ws/2/"
 
     @classmethod
     def _pick_artist(cls, artist_list: list[dict]):
@@ -32,7 +30,7 @@ class MusicMetadata:
 
     @classmethod
     def _artist_lookup(cls, artist_id: str) -> dict:
-        artist_lookup = f"{cls.artist_endpoit}{artist_id}?inc=release-groups&fmt=json"
+        artist_lookup = f"{cls.base_url}artist/{artist_id}?inc=release-groups&fmt=json"
         artist_response = requests.get(artist_lookup)
         artist_info = artist_response.json()
         return artist_info
@@ -41,7 +39,7 @@ class MusicMetadata:
     def _query_artist(cls, artist: str) -> dict:
         artist = artist.split()
         artist = "%20".join(artist)
-        artist_query = f"{cls.artist_endpoit}?query={artist}&fmt=json"
+        artist_query = f"{cls.base_url}artist/?query={artist}&fmt=json"
         response = requests.get(artist_query)
         artist_list = response.json()["artists"]
         return artist_list
@@ -50,7 +48,7 @@ class MusicMetadata:
     def _pick_release(cls, release_group: str) -> dict:
         release_id = release_group["id"]
         release_lookup = (
-            f"{cls.releases_endpoint}{release_id}?inc=artists+recordings&fmt=json"
+            f"{cls.base_url}release/{release_id}?inc=artists+recordings&fmt=json"
         )
         release_response = requests.get(release_lookup)
         release = release_response.json()
@@ -59,7 +57,7 @@ class MusicMetadata:
     @classmethod
     def _release_lookup(cls, release_group_id: str) -> dict:
         release_lookup = (
-            f"{cls.release_groups_endpoint}{release_group_id}?inc=releases&fmt=json"
+            f"{cls.base_url}release-group/{release_group_id}?inc=releases&fmt=json"
         )
         release_response = requests.get(release_lookup)
         release_info = release_response.json()["releases"][0]
@@ -70,7 +68,6 @@ class MusicMetadata:
         artist_list = cls._query_artist(artist)
         artist_pick = cls._pick_artist(artist_list)
         my_artist = cls._artist_lookup(artist_pick["id"])
-        __import__('pprint').pprint(my_artist)
         return my_artist
 
     @classmethod
@@ -83,6 +80,7 @@ class MusicMetadata:
                 release_pick = cls._pick_release(release_lookup)
                 albums.append(release_pick)
                 sleep(1)
+        __import__('pprint').pprint(albums)
         return albums
 
     @classmethod
@@ -115,9 +113,9 @@ def main(artist) -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_artist_info(artist)
+    client.get_albums(artist)
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
-    main("Coldplay")
+    main("kings of convenience")
