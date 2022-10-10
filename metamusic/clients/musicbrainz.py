@@ -107,15 +107,54 @@ class MusicMetadata:
                 sleep(1)
         return episodes
 
+    @classmethod
+    def pick_recording(cls, recordings_list: list, artist: str, release: str, title: str) -> dict:
+        my_recording = {}
+        while not my_recording:
+            for recording in recordings_list:
+                recording_title = recording["title"].lower()
+                recording_artist = recording["artist-credit"][0]["name"].lower()
+                release_title = recording["releases"][0]["release-group"]["title"].lower()
+                if recording_artist == artist:
+                    if release_title == release:
+                        if recording_title == title:
+                            my_recording = recording
+        return my_recording
+
+    @classmethod
+    def query_song(cls, song: str) -> dict:
+        song = song.split()
+        song = "%20".join(song)
+        song_search = f"{cls.base_url}recording/?query={song}&fmt=json"
+        response = requests.get(song_search)
+        response_list = response.json()["recordings"]
+        return response_list
+
+    @classmethod
+    def lookup_recording(cls, recording: dict) -> dict:
+        recording_id = recording["id"]
+        recording_lookup = f"{cls.base_url}recording/{recording_id}?inc=artists+releases+isrcs+url-rels&fmt=json"
+        lookup_response = requests.get(recording_lookup)
+        recording = lookup_response.json()
+        return recording
+
+    @classmethod
+    def get_recording(cls, artist: str, release: str, title: str):
+        recordings_list = cls.query_song(title)
+        pick_recording = cls.pick_recording(recordings_list, artist, release, title)
+        recording = cls.lookup_recording(pick_recording)
+        breakpoint()
+        return recording
+
 
 # --------------------------------------------------
-def main(artist) -> dict:
+def main() -> dict:
     """Main function for program"""
 
     client = MusicMetadata()
-    client.get_albums(artist)
+    client.get_recording(artist="kings of convenience", release="declaration of dependence", title="rule my world")
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
-    main("kings of convenience")
+    main()
