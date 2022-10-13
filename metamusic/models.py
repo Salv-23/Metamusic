@@ -9,4 +9,5 @@ class Track:
     album: str
     album_type: T.Optional[str] = None
     track_number: T.Optional[int] = None
+    total_tracks: T.Optional[int] = None
     release_date: T.Optional[str] = None
