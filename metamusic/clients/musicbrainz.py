@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Author : Salvador <salvador.estrella.ortiz@gmail.com>
 Date   : 2022-09-30
@@ -9,7 +8,7 @@ import requests
 
 
 # --------------------------------------------------
-class MusicMetadata:
+class MusicBrainz:
     base_url = "http://musicbrainz.org/ws/2/"
 
     @classmethod
@@ -128,16 +127,16 @@ class MusicMetadata:
 
 
 # --------------------------------------------------
-def main() -> dict:
-    """Main function for program"""
-
-    client = MusicMetadata()
-    artist = client.get_artist_info("kings of convenience")
-    release = client.get_release(artist="kings of convenience", release="quiet is the new loud")
-    title = client.get_title(artist="kings of convenience", release="quiet is the new loud", title="toxic girl")
-    title_relations = client.get_title_relations(artist="kings of convenience", release="quiet is the new loud", title="toxic girl")
-    breakpoint()
-
-
-if __name__ == "__main__":
-    main()
+# def main() -> dict:
+#     """Main function for program"""
+#
+#     client = MusicBrainz()
+#     artist = client.get_artist_info("kings of convenience")
+#     release = client.get_release(artist="kings of convenience", release="kings of convenience")
+#     title = client.get_title(artist="kings of convenience", release="kings of convenience", title="failure")
+#     title_relations = client.get_title_relations(artist="kings of convenience", release="kings of convenience", title="failure")
+#     breakpoint()
+#
+#
+# if __name__ == "__main__":
+#     main()
