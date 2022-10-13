@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Author : Salvador <Salvador@fedora>
 Date   : 2022-10-05
@@ -27,5 +26,3 @@ def get_args():
     )
 
     return parser.parse_args()
-
-
