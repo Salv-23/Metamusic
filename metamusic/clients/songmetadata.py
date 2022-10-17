@@ -4,22 +4,9 @@ Author : Salvador <Salvador@fedora>
 Date   : 2022-10-15
 Purpose: New program
 """
-from dataclasses import dataclass
+from metamusic.models import Track
 import argparse
 import eyed3
-import typing as T
-
-
-# --------------------------------------------------
-@dataclass
-class Track:
-    artist: str
-    title: str
-    album: str
-    album_type: T.Optional[str] = None
-    track_number: T.Optional[int] = None
-    total_tracks: T.Optional[int] = None
-    release_date: T.Optional[str] = None
 
 
 # --------------------------------------------------
@@ -94,7 +81,7 @@ def main():
     metadata = {
             "artist": "Los Tucanes de Tijuana",
             "title": "La Chona",
-            "album": "Me Robaste El Corazón",
+            "album": "Me Robastes El Corazón",
             "track_num": 6,
             "total_tracks": 12,
             "album_type": "lp",
