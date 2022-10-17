@@ -14,17 +14,27 @@ def get_args():
     """Get command-line arguments"""
 
     parser = argparse.ArgumentParser(
-            description="eyeD3 client to get or update metadata",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        description="eyeD3 client to get or update metadata",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
     parser.add_argument(
-            "-t",
-            "--track",
-            help="A track file to get or update metadata",
-            metavar="str",
-            type=str,
-            required=True,
-            )
+        "-t",
+        "--track",
+        help="A track file to get or update metadata",
+        metavar="str",
+        type=str,
+        required=True,
+    )
+
+    parser.add_argument(
+        "-i",
+        "--image",
+        help="An image file to update album artwork",
+        metavar="str",
+        type=str,
+        required=True,
+    )
 
     return parser.parse_args()
 
@@ -33,14 +43,14 @@ def get_args():
 def get_track_tags(path: str):
     track = eyed3.load(path)
     track_info = Track(
-            artist=track.tag.artist,
-            album=track.tag.album,
-            title=track.tag.title,
-            track_number=track.tag.track_num[0],
-            total_tracks=track.tag.track_num[1],
-            album_type=track.tag.album_type,
-            release_date=track.tag.release_date.year,
-            )
+        artist=track.tag.artist,
+        album=track.tag.album,
+        title=track.tag.title,
+        track_number=track.tag.track_num[0],
+        total_tracks=track.tag.track_num[1],
+        album_type=track.tag.album_type,
+        release_date=track.tag.release_date.year,
+    )
     return track_info
 
 
@@ -75,6 +85,20 @@ def set_all_tags(path: str, metadata: dict):
 
 
 # --------------------------------------------------
+def set_image_tag(track_path: str, image_path: str):
+    track = eyed3.load(track_path)
+    with open(image_path, mode="rb") as image_file:
+        imagedata = image_file.read()
+    track.tag.images.set(
+        type_=3,
+        img_data=imagedata,
+        mime_type="image/jpeg",
+        description="cover",
+    )
+    track.tag.save(version=eyed3.id3.ID3_V2_3)
+
+
+# --------------------------------------------------
 def main():
     """Main function for program"""
     arguments = get_args()
@@ -88,9 +112,12 @@ def main():
             "release_date": 2022,
             }
     tag_selection = ["artist", "album", "title"]
+    # Testing functions
+    set_all_tags(path=arguments.track, metadata=metadata)
     set_selected_tags(path=arguments.track, metadata=metadata, tag_selection=tag_selection)
+    set_image_tag(track_path=arguments.track, image_path=arguments.image)
 
 
 # --------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
