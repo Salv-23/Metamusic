@@ -7,7 +7,7 @@ Purpose: New program
 from metamusic.models import Track
 import argparse
 import eyed3
-
+import requests
 
 # --------------------------------------------------
 def get_args():
@@ -85,13 +85,26 @@ def set_all_tags(path: str, metadata: dict):
 
 
 # --------------------------------------------------
-def set_image_tag(track_path: str, image_path: str):
+def set_artwork_locally(track_path: str, image_path: str):
     track = eyed3.load(track_path)
     with open(image_path, mode="rb") as image_file:
-        imagedata = image_file.read()
+        image_data = image_file.read()
     track.tag.images.set(
         type_=3,
-        img_data=imagedata,
+        img_data=image_data,
+        mime_type="image/jpeg",
+        description="cover",
+    )
+    track.tag.save(version=eyed3.id3.ID3_V2_3)
+
+
+# --------------------------------------------------
+def set_artwork_from_url(track_path: str, image_url: str):
+    track = eyed3.load(track_path)
+    web_image = requests.get(image_url)
+    track.tag.images.set(
+        type_=3,
+        img_data=web_image.content(),
         mime_type="image/jpeg",
         description="cover",
     )
@@ -103,19 +116,20 @@ def main():
     """Main function for program"""
     arguments = get_args()
     metadata = {
-            "artist": "Los Tucanes de Tijuana",
-            "title": "La Chona",
-            "album": "Me Robastes El Corazón",
-            "track_num": 6,
-            "total_tracks": 12,
-            "album_type": "lp",
-            "release_date": 2022,
-            }
+        "artist": "Los Tucanes de Tijuana",
+        "title": "La Chona",
+        "album": "Me Robastes El Corazón",
+        "track_num": 6,
+        "total_tracks": 12,
+        "album_type": "lp",
+        "release_date": 2022,
+    }
     tag_selection = ["artist", "album", "title"]
     # Testing functions
     set_all_tags(path=arguments.track, metadata=metadata)
-    set_selected_tags(path=arguments.track, metadata=metadata, tag_selection=tag_selection)
-    set_image_tag(track_path=arguments.track, image_path=arguments.image)
+    set_selected_tags(
+        path=arguments.track, metadata=metadata, tag_selection=tag_selection
+    )
 
 
 # --------------------------------------------------
