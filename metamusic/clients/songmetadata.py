@@ -4,10 +4,13 @@ Author : Salvador <Salvador@fedora>
 Date   : 2022-10-15
 Purpose: New program
 """
-from metamusic.models import Track
 import argparse
+
 import eyed3
 import requests
+
+from metamusic.models import Track
+
 
 # --------------------------------------------------
 def get_args():
@@ -30,10 +33,19 @@ def get_args():
     parser.add_argument(
         "-i",
         "--image",
-        help="An image file to update album artwork",
+        help="An image file location",
         metavar="str",
         type=str,
-        required=True,
+        required=False,
+    )
+
+    parser.add_argument(
+        "-u",
+        "--url",
+        help="URL to an image file",
+        metavar="str",
+        type=str,
+        required=False,
     )
 
     return parser.parse_args()
@@ -49,7 +61,7 @@ def get_track_tags(path: str):
         track_number=track.tag.track_num[0],
         total_tracks=track.tag.track_num[1],
         album_type=track.tag.album_type,
-        release_date=track.tag.release_date.year,
+        release_date=track.tag.original_release_date.year,
     )
     return track_info
 
@@ -68,7 +80,7 @@ def set_selected_tags(path: str, metadata: dict, tag_selection: list[str]):
     if "album_type" in tag_selection:
         track.tag.album_type = metadata["album_type"]
     if "release_date" in tag_selection:
-        track.tag.original_release_date = metadata["release_date"]
+        track.tag.release_date = metadata["release_date"]
     track.tag.save()
 
 
@@ -80,7 +92,7 @@ def set_all_tags(path: str, metadata: dict):
     track.tag.title = metadata["title"]
     track.tag.track_num = (metadata["track_num"], metadata["total_tracks"])
     track.tag.album_type = metadata["album_type"]
-    track.tag.original_release_date = metadata["release_date"]
+    track.tag.release_date = metadata["release_date"]
     track.tag.save()
 
 
@@ -104,7 +116,7 @@ def set_artwork_from_url(track_path: str, image_url: str):
     web_image = requests.get(image_url)
     track.tag.images.set(
         type_=3,
-        img_data=web_image.content(),
+        img_data=web_image.content,
         mime_type="image/jpeg",
         description="cover",
     )
@@ -127,9 +139,7 @@ def main():
     tag_selection = ["artist", "album", "title"]
     # Testing functions
     set_all_tags(path=arguments.track, metadata=metadata)
-    set_selected_tags(
-        path=arguments.track, metadata=metadata, tag_selection=tag_selection
-    )
+    # set_artwork_from_url(track_path=arguments.track, image_url=arguments.url)
 
 
 # --------------------------------------------------
