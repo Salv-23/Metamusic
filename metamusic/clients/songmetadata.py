@@ -4,12 +4,11 @@ Author : Salvador <Salvador@fedora>
 Date   : 2022-10-15
 Purpose: New program
 """
-import argparse
-
-import eyed3
-import requests
 
 from metamusic.models import Track
+import argparse
+import eyed3
+import requests
 
 
 # --------------------------------------------------
@@ -61,7 +60,7 @@ def get_track_tags(path: str):
         track_number=track.tag.track_num[0],
         total_tracks=track.tag.track_num[1],
         album_type=track.tag.album_type,
-        recording_date=str(track.tag.recording_date)
+        recording_date=str(track.tag.recording_date),
     )
     breakpoint()
     return track_info
@@ -141,7 +140,7 @@ def main():
     # Testing functions
     set_all_tags(path=arguments.track, metadata=metadata)
     set_artwork_from_url(track_path=arguments.track, image_url=arguments.url)
-    # get_track_tags(path=arguments.track)
+    get_track_tags(path=arguments.track)
 
 
 # --------------------------------------------------
