@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import typing as T
+from dataclasses import dataclass
 
 
 @dataclass
@@ -10,4 +10,4 @@ class Track:
     album_type: T.Optional[str] = None
     track_number: T.Optional[int] = None
     total_tracks: T.Optional[int] = None
-    release_date: T.Optional[str] = None
+    recording_date: T.Optional[str] = None
