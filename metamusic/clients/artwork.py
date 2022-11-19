@@ -6,8 +6,8 @@ Purpose: Program to retrieve HD artwork from iTunes
 """
 
 import argparse
-
 import requests
+import re
 
 
 # --------------------------------------------------
@@ -40,7 +40,7 @@ def get_args():
 
 # --------------------------------------------------
 def get_release_object(release: str, artist: str) -> dict:
-    """Search and returns artwork url"""
+    """Search and return a release object"""
 
     release_object = {}
     url = "https://artwork.themoshcrypt.net/api/search?keyword="
@@ -57,14 +57,33 @@ def get_release_object(release: str, artist: str) -> dict:
 
 
 # --------------------------------------------------
+def get_release_object_substring(release_object: dict) -> str:
+    """Use regular expression to retrieve substring."""
+
+    pattern = re.compile("Music.+(\.jpg)(?=/)|Music.+(\.png)(?=/)")
+    string = release_object["artworkUrl100"]
+    match = pattern.search(string)
+    if match:
+        if match.group(0):
+            return match.group(0)
+        elif match.group(1):
+            return match.group(1)
+    else:
+        raise ValueError("No match found for artwork url")
+
+
+# --------------------------------------------------
 def main():
     """Main function for program"""
 
     args = get_args()
-    object = get_release_object(release=args.release, artist=args.artist)
-    breakpoint()
+    release_object = get_release_object(release=args.release, artist=args.artist)
+    substring = get_release_object_substring(release_object=release_object)
+    print(substring)
+    return substring
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
     main()
+
