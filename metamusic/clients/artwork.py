@@ -57,17 +57,19 @@ def get_release_object(release: str, artist: str) -> dict:
 
 
 # --------------------------------------------------
-def get_release_object_substring(release_object: dict) -> str:
-    """Use regular expression to retrieve substring."""
+def get_high_definition_artwork_url(release_object: dict) -> str:
+    """Find the url for a high-definition artwork"""
 
+    high_definition_url = "https://s1.mzstatic.com/us/r1000/063/"
+    low_definition_url = release_object["artworkUrl100"]
     pattern = re.compile("Music.+(\.jpg)(?=/)|Music.+(\.png)(?=/)")
-    string = release_object["artworkUrl100"]
-    match = pattern.search(string)
-    if match:
-        if match.group(0):
-            return match.group(0)
-        elif match.group(1):
-            return match.group(1)
+    artwork_directory = pattern.search(low_definition_url)
+    jpg_artwork_directory = artwork_directory.group(0)
+    png_artwork_directory = artwork_directory.group(1)
+    if jpg_artwork_directory:
+        return high_definition_url + jpg_artwork_directory
+    elif png_artwork_directory:
+        return high_definition_url + png_artwork_directory
     else:
         raise ValueError("No match found for artwork url")
 
@@ -78,12 +80,11 @@ def main():
 
     args = get_args()
     release_object = get_release_object(release=args.release, artist=args.artist)
-    substring = get_release_object_substring(release_object=release_object)
-    print(substring)
-    return substring
+    artwork_url = get_high_definition_artwork_url(release_object=release_object)
+    breakpoint()
+    return artwork_url
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
     main()
-
