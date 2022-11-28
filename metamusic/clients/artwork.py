@@ -5,61 +5,34 @@ Date   : 2022-11-16
 Purpose: Program to retrieve HD artwork from iTunes
 """
 
-import argparse
+from term_image.image import from_url
 import requests
 import re
+import typer
 
 
-# --------------------------------------------------
-def get_args():
-    """Get command-line arguments"""
-
-    parser = argparse.ArgumentParser(
-        description="New Program",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "-r",
-        "--release",
-        help="Name of the release",
-        metavar="str",
-        type=str,
-    )
-
-    parser.add_argument(
-        "-a",
-        "--artist",
-        help="Name of the artist",
-        metavar="str",
-        type=str,
-    )
-
-    return parser.parse_args()
-
-
+app = typer.Typer()
 # --------------------------------------------------
 def get_release_object(release: str, artist: str) -> dict:
-    """Search and return a release object"""
-
-    release_object = {}
+    release_info = {}
     url = "https://artwork.themoshcrypt.net/api/search?keyword="
-    release = "%2B".join(release.split()).lower()
-    response = requests.get(url + release).json()
+    release_query = "%2B".join(release.split()).lower()
+    response = requests.get(url + release_query).json()
     for result in response["results"]:
-        if result["artistName"].lower() == artist.lower():
-            release_object = result
-    if not release_object:
-        raise ValueError(
-            "No release found. check release and artist name and try again."
-        )
-    return release_object
+        result_collection = result["collectionCensoredName"].lower().split(" -")[0]
+        result_artist = result["artistName"].lower()
+        if result_artist == artist.lower():
+            if result_collection == release.lower():
+                release_info = result
+        if not release_info:
+            raise ValueError(
+                "No release found. check release and artist name and try again."
+            )
+    return release_info
 
 
 # --------------------------------------------------
-def get_high_definition_artwork_url(release_object: dict) -> str:
-    """Find the url for a high-definition artwork"""
-
+def get_high_definition_artwork_url(release_object: str) -> str:
     high_definition_url = "https://s1.mzstatic.com/us/r1000/063/"
     low_definition_url = release_object["artworkUrl100"]
     pattern = re.compile("Music.+(\.jpg)(?=/)|Music.+(\.png)(?=/)")
@@ -71,20 +44,19 @@ def get_high_definition_artwork_url(release_object: dict) -> str:
     elif png_artwork_directory:
         return high_definition_url + png_artwork_directory
     else:
-        raise ValueError("No match found for artwork url")
+        raise ValueError("No high definition artwork found")
 
 
 # --------------------------------------------------
-def main():
-    """Main function for program"""
+@app.command()
+def display_artwork(release: str, artist: str):
 
-    args = get_args()
-    release_object = get_release_object(release=args.release, artist=args.artist)
-    artwork_url = get_high_definition_artwork_url(release_object=release_object)
-    breakpoint()
-    return artwork_url
+    release_object = get_release_object(release=release, artist=artist)
+    artwork_url = get_high_definition_artwork_url(release_object)
+    image = from_url(artwork_url)
+    image.draw()
 
 
 # --------------------------------------------------
 if __name__ == "__main__":
-    main()
+    app()
