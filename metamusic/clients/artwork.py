@@ -8,6 +8,10 @@ Purpose: Program to retrieve and display HD artwork in the terminal.
 from term_image.image import from_url
 import requests
 import re
+import typer
+
+
+app = typer.Typer()
 
 
 # --------------------------------------------------
@@ -72,6 +76,7 @@ def get_high_definition_artwork_url(release_object: str) -> str:
 
 
 # --------------------------------------------------
+@app.command()
 def main(release: str, artist: str):
     """Display artwork for a given release and artist in the terminal.
 
@@ -88,4 +93,4 @@ def main(release: str, artist: str):
 
 # --------------------------------------------------
 if __name__ == "__main__":
-    main()
+    app()
