@@ -8,10 +8,6 @@ Purpose: Program to retrieve and display HD artwork in the terminal.
 from term_image.image import from_url
 import requests
 import re
-import typer
-
-
-app = typer.Typer()
 
 
 # --------------------------------------------------
@@ -19,11 +15,11 @@ def get_release_information(release: str, artist: str) -> dict:
     """Find release information for a given release-artist name."
 
     Args:
-        release (str): The name of the release to retrieve
-        artist (str): The name of the release artist
+        release (str): The name of the release to retrieve.
+        artist (str): The name of the release artist.
 
     Raises:
-        ValueError: When the release information is not found
+        ValueError: When the release information is not found.
 
     Returns:
         dict: Useful release information such as URLs for release artwork.
@@ -76,8 +72,7 @@ def get_high_definition_artwork_url(release_object: str) -> str:
 
 
 # --------------------------------------------------
-@app.command()
-def main(release: str, artist: str):
+def display_artwork_from_url(release: str, artist: str):
     """Display artwork for a given release and artist in the terminal.
 
     Args:
@@ -89,8 +84,3 @@ def main(release: str, artist: str):
     artwork_url = get_high_definition_artwork_url(release_object)
     image = from_url(artwork_url)
     image.draw()
-
-
-# --------------------------------------------------
-if __name__ == "__main__":
-    app()
